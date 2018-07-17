@@ -1,0 +1,27 @@
+{
+  "name": "qrcode-decode",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm demo",
+    "demo": "parcel ./demo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnwhy/QRCode-decode.git"
+  },
+  "keywords": [
+    "qrcode",
+    "decode"
+  ],
+  "author": "cnwhy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cnwhy/QRCode-decode/issues"
+  },
+  "homepage": "https://github.com/cnwhy/QRCode-decode#readme",
+  "devDependencies": {
+    "parcel": "^1.9.7"
+  }
+}
