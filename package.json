@@ -23,5 +23,10 @@
   "homepage": "https://github.com/cnwhy/QRCode-decode#readme",
   "devDependencies": {
     "parcel": "^1.9.7"
+  },
+  "dependencies": {
+    "bmp-js": "^0.1.0",
+    "image-type": "^3.0.0",
+    "pako": "^1.0.6"
   }
 }

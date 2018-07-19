@@ -1,3 +1,4 @@
+var GF256 = require('./GF256')
 var GF256Poly = require('./GF256Poly')
 
 module.exports = function ReedSolomonDecoder(field) {

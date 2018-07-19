@@ -116,7 +116,7 @@ function decode(imageDate,debugfn){
 }
 
 var process = function (data,base) {
-    var start = new Date().getTime();
+    // var start = new Date().getTime();
     // var image = grayScaleToBitmap(grayscale(),base);
     // var image = binarize(128);
 	var image = binarize(data,base,153); //转为位图;
@@ -146,10 +146,9 @@ var process = function (data,base) {
             str += String.fromCharCode(data[i][j]);
     }
 
-    var end = new Date().getTime();
-    var time = end - start;
-
-    console.log("Time:" + time + " Code: "+str);
+    // var end = new Date().getTime();
+    // var time = end - start;
+    // console.log("Time:" + time + " Code: "+str);
     return str;
 }
 
