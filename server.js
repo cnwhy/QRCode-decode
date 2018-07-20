@@ -4,8 +4,11 @@ var imgType = require('image-type')
 var qrDecode = require('./')
 // var jpg = require('./src/imageDecode/jpg');
 
-
-function decode(buffer) {
+/**
+ * 通过Buffer识别二维码
+ * @param {buufer} buffer 文件的Buffer
+ */
+function decodeByBuffer(buffer,debug) {
 	var type;
 	return new Promise(function (res, rej) {
 		type = (imgType(buffer) || {}).ext;
@@ -31,7 +34,7 @@ function decode(buffer) {
 				throw 'not image!'
 		}
 	}).then(function (imageData) {
-		if (type == 'gif') {
+		if (type == 'gif' || type == 'png') {
 			return new Promise(function (res, rej) {
 				var errList = [];
 				var images = imageData;
@@ -40,7 +43,7 @@ function decode(buffer) {
 					if (errList.length < images.length) return;
 					rej('解码失败!')
 				}
-				// console.log('length',imageData.length)
+				debug && console.log('length',imageData.length)
 				if (imageData.length <= 0) {
 					rej('解码失败!')
 				} else if (imageData.length > 3) {
@@ -57,13 +60,13 @@ function decode(buffer) {
 						images.push(imageData[Math.floor(i*sp)])
 					}while(i++<l)
 				}
-				// console.log(images.length)
+				debug && console.log(images.length)
 				images.forEach(function (v) {
 					setTimeout(function () {
 						try {
 							res(qrDecode(v));
 						} catch (e) {
-							console.log(e);
+							debug && console.log(e);
 							onerr(e)
 						}
 					}, 0)
@@ -73,13 +76,19 @@ function decode(buffer) {
 		return qrDecode(imageData);
 	})
 }
-exports.decodeQRFile = function (path) {
+
+/**
+ * 识别二维码图片文件
+ * @param {String} path 文件路径
+ */
+exports.decodeByPath = function (path) {
 	return new Promise(function (res, rej) {
 		fs.readFile(path, function (err, buffer) {
 			if (err) { return rej(err) }
-			res(decode(buffer));
+			res(decodeByBuffer(buffer));
 		})
 	})
 }
 
-exports.decode = decode;
+exports.decodeByBuffer = decodeByBuffer;
+exports.decodeByImageData = qrDecode;

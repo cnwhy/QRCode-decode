@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm demo",
-    "demo": "parcel ./demo"
+    "test": "npm run demo",
+    "demo": "parcel ./demo/index.html"
   },
   "repository": {
     "type": "git",

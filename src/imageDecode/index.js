@@ -1,9 +1,11 @@
 var jpg = require('./jpg');
 var jpgDecode = new jpg.JpegDecoder();
-var pngDecode = require('./png').decode;
+var upng = require('./png');
 var bmpDecode = require('./bmp');
 var gifDecode = require('./gif').decode;
 var gif1Decode = require('./gif.1').decode;
+
+
 
 exports.bmp = function (buffer) {
 	// return new Promise(function (res, rej) {
@@ -22,20 +24,18 @@ exports.jpg = function (buffer) {
 }
 
 exports.png = function (buffer) {
-	// return new Promise(function (res, rej) {
-	// 	var png = pngDecode(buffer);
-	// 	res({
-	// 		data: png.data,
-	// 		width: png.width,
-	// 		height: png.height
-	// 	});
-	// })
-	var png = pngDecode(buffer);
-	return {
-		data: png.data,
-		width: png.width,
-		height: png.height
-	};
+	// console.log('png');
+	var png = upng.decode(buffer);
+	var datas = upng.toRGBA8(png);
+	var images = [];
+	datas.forEach(function(v){
+		images.push({
+			width:png.width,
+			height:png.height,
+			data:new Uint8Array(v),
+		})
+	})
+	return images;
 }
 
 exports.gif = function (data) {

@@ -1,5 +1,5 @@
-var qrcodeDecode = require('../')
-
+var qrcodeDecode = require('../browser')
+console.log(1111)
 document.getElementById('file').onchange = function (event) {
 	var el = event.target;
 	if (!el.files.length) return;
@@ -20,19 +20,16 @@ document.getElementById('file').onchange = function (event) {
 			ok();
 		}
 	}).then((src)=>{
-		var img = new Image();
-		img.src = src;
-		img.onload = function(){
-			var canvas = document.createElement("canvas");
-			var ctx = canvas.getContext('2d');
-			canvas.width = img.width;
-			canvas.height = img.height;
-			ctx.drawImage(img,0,0,canvas.width,canvas.height)
-			//inputimg.src = src;
-			//qrcode.decode(src);
-			var imageData = ctx.getImageData(0,0,canvas.width,canvas.height)
-			alert(qrcodeDecode(imageData));
-		}
+		qrcodeDecode.decodeByUrl(src,function(err,txt){
+			var msg = document.createElement("div")
+			if(err){
+				console.log(err);
+				msg.innerHTML = "err: <br>" + err;
+			}else{
+				msg.innerHTML = txt;
+			}
+			document.body.appendChild(msg);
+		})
 
 	});
 
