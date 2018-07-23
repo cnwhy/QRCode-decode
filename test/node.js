@@ -18,7 +18,7 @@ async function test_time(path, mark) {
 	}
 	console.log(mark + ' 100次 : ', Date.now() - t,' ms');
 }
-console.table({a:1,b:2})
+
 // var test = test_time;
 
 var test = function (path, mark) {

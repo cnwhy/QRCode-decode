@@ -1,5 +1,5 @@
 
-var qrDecode = require('./src/QRCodeDecode');
+var qrDecode = require('./src/QRDecode');
 var decodeByDom = function (dom) {
 	var canvas = document.createElement("canvas")
 	var ctx = canvas.getContext('2d')

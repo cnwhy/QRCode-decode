@@ -1,4 +1,4 @@
-# qrcode-decode
+# qr-decode
 解密/识别 QRCode码
 
 说明: 主要的二维码识别代码整理自 [jsqrcode](https://github.com/LazarSoft/jsqrcode);
@@ -17,16 +17,16 @@
 
 ## install
 ```
-npm i qrcode-decode
+npm i qr-decode
 ```
 
 ## import 
 ```js
-var qrDecode = require('qrcode-decode');
+var qrDecode = require('qr-decode');
 //web
-var qr_web = require('qrcode-decode/browser')
+var qr_web = require('qr-decode/browser')
 //node
-var qr_node = require('qrcode-decode/server')
+var qr_node = require('qr-decode/server')
 
 var text = qrDecode(dataImage);
 ```
@@ -36,16 +36,16 @@ var text = qrDecode(dataImage);
 ### web
 > web端最终是利用`Canvas`获取`ImageData`, 注意兼容及跨域问题 
 ```js
-var qrcodeDecode = require('qrcode-decode/browser');
+var qrDecode = require('qr-decode/browser');
 // 传入二维码图片URL/dataURL
-qrcodeDecode.decodeByUrl(src, function (err, txt) {
+qrDecode.decodeByUrl(src, function (err, txt) {
 	if (err) { return console.log(err);}	
 	alert(txt);
 })
 
 // 传入DOM可以画到canvas的dom都可以 `img` `canvas` 'video' 等
 var img = document.getElementById('img1');
-qrcodeDecode.decodeByDom(img, function (err, txt) {
+qrDecode.decodeByDom(img, function (err, txt) {
 	if (err) { return console.log(err);}	
 	alert(txt);
 })
@@ -55,15 +55,15 @@ qrcodeDecode.decodeByDom(img, function (err, txt) {
 > 注意: 服务器端API是以 `promise` 返回结果, 你注意你的`node`版本;
 ```js
 //解析文件
-var qrcodeDecode = require('qrcode-decode/server');
-qrcodeDecode.decodeByPath('xx/code.jpg').then(function(val){
+var qrDecode = require('qr-decode/server');
+qrDecode.decodeByPath('xx/code.jpg').then(function(val){
 	console.log(val);
 },console.error.bind(console))
 
 //解析Buffer
 fs.readFile(path, function (err, buffer) {
 	if (err) { return rej(err) }
-	resqrcodeDecode.decodeByBuffer(buffer);
+	qrDecode.decodeByBuffer(buffer);
 })
 
 ```

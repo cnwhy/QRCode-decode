@@ -139,6 +139,7 @@ var process = function (data,base) {
 
 	// 解析QR矩阵
     var reader = Decoder.decode(qRCodeMatrix.bits);
+    // console.log(reader);
     var data = reader.DataByte;
     var str = "";
     for (var i = 0; i < data.length; i++) {
