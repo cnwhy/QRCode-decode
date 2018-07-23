@@ -18,15 +18,19 @@ var byteToBitArr = function (bite) {
  * @constructor
  */ // Make compiler happy.
 var Stream = function (data) {
+	
 	this.data = data;
-	this.len = this.data.length;
-	this.pos = 0;
+	var len = this.data.length;
+	var pos = 0;
 
 	this.readByte = function () {
-		if (this.pos >= this.data.length) {
+		if (pos >= len) {
 			throw new Error('Attempted to read past end of stream.');
 		}
-		return data.charCodeAt(this.pos++) & 0xFF;
+		// return data.charCodeAt(pos++) & 0xFF;
+		// var bit = data[pos++];
+		// return String.fromCharCode(bit).charCodeAt(0) & 0xff;
+		return data[pos++];
 	};
 
 	this.readBytes = function (n) {
@@ -35,6 +39,12 @@ var Stream = function (data) {
 			bytes.push(this.readByte());
 		}
 		return bytes;
+		// var start = pos
+		// pos += n;
+		// if(start>= len || pos > len){
+		// 	throw new Error('Attempted to read past end of stream.');
+		// }
+		// return [].slice.call(data,start,pos)
 	};
 
 	this.read = function (n) {
@@ -51,14 +61,14 @@ var Stream = function (data) {
 	};
 };
 
-var lzwDecode = function (minCodeSize, data) {
+var lzwDecode = function (minCodeSize, data, gct,GCE) {
 	// TODO: Now that the GIF parser is a bit different, maybe this should get an array of bytes instead of a String?
 	var pos = 0; // Maybe this streaming thing should be merged with the Stream?
 
 	var readCode = function (size) {
 		var code = 0;
 		for (var i = 0; i < size; i++) {
-			if (data.charCodeAt(pos >> 3) & (1 << (pos & 7))) {
+			if (data[pos >> 3] & (1 << (pos & 7))) {
 				code |= 1 << i;
 			}
 			pos++;
@@ -67,6 +77,7 @@ var lzwDecode = function (minCodeSize, data) {
 	};
 
 	var output = [];
+	var imageData = [];
 
 	var clearCode = 1 << minCodeSize;
 	var eoiCode = clearCode + 1;
@@ -105,9 +116,32 @@ var lzwDecode = function (minCodeSize, data) {
 			}
 		} else {
 			if (code !== dict.length) throw new Error('Invalid LZW code.');
-			dict.push(dict[last].concat(dict[last][0]));
+			// try{
+				dict.push(dict[last].concat(dict[last][0]));
+
+			// }catch(e){
+			// 	console.log(minCodeSize,data);
+			// 	console.log(dict,last);
+			// 	throw e
+			// }
 		}
-		output.push.apply(output, dict[code]);
+		var inItem = dict[code];
+		// output.push.apply(output, inItem);
+
+		inItem.forEach(function(v){
+			// output.push(v);
+			var rgb = gct[v]
+			imageData.push(rgb[0],rgb[1],rgb[2],GCE.transparencyIndex == v ? 0 : 255)
+		})
+
+		// imageData.push.apply(imageData, inItem.map(function(v){
+		// 	var c = gct[v];
+		// 	var rgba = [c[0],c[1],c[2],GCE.transparencyIndex == v ? 0 : 255]
+		// 	//rgba.push(GCE.transparencyIndex == v ? 0 : 255)
+		// 	// return color;
+		// 	return rgba;
+		// 	// return color.slice(0).push(GCE.transparencyIndex == v ? 0 : 255)
+		// }))
 
 		if (dict.length === (1 << codeSize) && codeSize < 12) {
 			// If we're at the last code and codeSize is 12, the next code will be a clearCode, and it'll be 12 bits long.
@@ -117,13 +151,13 @@ var lzwDecode = function (minCodeSize, data) {
 
 	// I don't know if this is technically an error, but some GIFs do it.
 	//if (Math.ceil(pos / 8) !== data.length) throw new Error('Extraneous LZW bytes.');
-	return output;
+	return [output,imageData];	
 };
 
 // The actual parsing; returns an object with properties.
 var parseGIF = function (st, handler) {
 	handler || (handler = {});
-
+	var GCE,gct;
 	// LZW (GIF-specific)
 	var parseCT = function (entries) { // Each entry is 3 bytes, for RGB.
 		var ct = [];
@@ -142,6 +176,17 @@ var parseGIF = function (st, handler) {
 		} while (size !== 0);
 		return data;
 	};
+
+	var readByteBlocks = function(){
+		var size, data;
+		data = [];
+		do {
+			size = st.readByte();
+			data.push.apply(data,st.readBytes(size))
+			// data = data.concat(st.readBytes(size));
+		} while (size !== 0);
+		return data;
+	}
 
 	var parseHeader = function () {
 		var hdr = {};
@@ -162,7 +207,7 @@ var parseGIF = function (st, handler) {
 		hdr.pixelAspectRatio = st.readByte(); // if not 0, aspectRatio = (pixelAspectRatio + 15) / 64
 
 		if (hdr.gctFlag) {
-			hdr.gct = parseCT(1 << (hdr.gctSize + 1));
+			gct = hdr.gct = parseCT(1 << (hdr.gctSize + 1));
 		}
 		handler.hdr && handler.hdr(hdr);
 	};
@@ -182,7 +227,7 @@ var parseGIF = function (st, handler) {
 			block.transparencyIndex = st.readByte();
 
 			block.terminator = st.readByte();
-
+			GCE = block;
 			handler.gce && handler.gce(block);
 		};
 
@@ -302,12 +347,17 @@ var parseGIF = function (st, handler) {
 
 		img.lzwMinCodeSize = st.readByte();
 
-		var lzwData = readSubBlocks();
-
-		img.pixels = lzwDecode(img.lzwMinCodeSize, lzwData);
-
+		// var lzwData = readSubBlocks();
+		var lzwData = readByteBlocks();
+		var lzwd = lzwDecode(img.lzwMinCodeSize, lzwData, gct,GCE);
+		img.pixels = lzwd[0];
+		img.data = lzwd[1];
+		// console.log(img.imageData)
 		if (img.interlaced) { // Move
+			console.log(img.pixels)
 			img.pixels = deinterlace(img.pixels, img.width);
+			console.log(img.pixels)
+
 		}
 
 		handler.img && handler.img(img);
@@ -404,6 +454,7 @@ exports.decode = function (buffer) {
 		GCE = gce;
 	};
 	//当前帧的图片图像信息
+	// var doimgTime = 0;
 	var doImg = function (img) {
 		// log('Image descriptor:');
 		// log(Object.assign({},img,{'pixels':Math.max.apply(Math,img.pixels)}));
@@ -411,19 +462,25 @@ exports.decode = function (buffer) {
 		// log('  LCT? %s%s', showBool(img.lctFlag), img.lctFlag ? ' (' + img.lct.length + ' entries)' : '');
 		// log('  Interlaced? %s', showBool(img.interlaced));
 		// log('  %d pixels', img.pixels.length);
-		var data = [];
+		// var t1 = Date.now();
+		// var data = [];
+		// console.log(data.length , img.width * img.height)
 		var imageData = {
 			left: img.leftPos,
 			top: img.topPos,
 			width: img.width,
 			height: img.height,
-			data: data
+			// data: data,
+			data: img.data,
 		}
-		img.pixels.forEach(function (v) {
-			var color = gct[v];
-			data.push.apply(data, color.concat(GCE.transparencyIndex == v ? 0 : 255));
-		})
+		// img.pixels.forEach(function (v) {
+		// 	var color = gct[v];
+		// 	data.push.apply(data, color.concat(GCE.transparencyIndex == v ? 0 : 255));
+		// })
+		// console.log(data.length)
+		// console.log(img.imageData.length)
 		gifData.images.push(imageData);
+		// doimgTime += Date.now() - t1;
 	};
 
 	var doNetscape = function (block) {
@@ -461,7 +518,8 @@ exports.decode = function (buffer) {
 		eof: doEOF
 	};
 
-	var st = new Stream(buffer.toString('binary'));
+	var st = new Stream(buffer);
 	parseGIF(st, handler);
+	// console.log('doimgTime:',doimgTime)
 	return gifData;
 }

@@ -6,12 +6,31 @@ var P = function (p) {
 	return path.join(__dirname, p);
 }
 
-var test = function (path, mark) {
+var _test = function (path, mark) {
 	return imgDecode.decodeByPath(P(path))
-		.then(console.log.bind(console, mark + ': '), console.error.bind(console, mark + ':'))
 }
+
+var max = 100
+async function test_time(path, mark) {
+	var t = Date.now();
+	for (var i = 0; i < max; i++) {
+		await _test(path, mark);
+	}
+	console.log(mark + ' 100次 : ', Date.now() - t,' ms');
+}
+console.table({a:1,b:2})
+// var test = test_time;
+
+var test = function (path, mark) {
+	return _test(path, mark)
+		.then(console.log.bind(console, mark + ': '))
+		.then(function () {
+			return test_time(path, mark);
+		},console.error.bind(console, mark + ':'))
+};
+
 Promise.resolve()
-	.then(function () { test('./img/16.bmp', 'bmp16 ') })
+	.then(function () { return test('./img/16.bmp', 'bmp16 ') })
 	.then(function () { return test('./img/24.bmp', 'bmp24 ') })
 	.then(function () { return test('./img/32.bmp', 'bmp32 ') })
 	.then(function () { return test('/img/lx.jpg', 'jpg_lx') }) //jpg 连续

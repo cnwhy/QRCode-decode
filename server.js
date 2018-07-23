@@ -1,14 +1,15 @@
 var fs = require('fs')
-var imgDecode = require('./src/imageDecode')
 var imgType = require('image-type')
-var qrDecode = require('./')
-// var jpg = require('./src/imageDecode/jpg');
+var imgDecode = require('./src/imageDecode')
+var qrDecode = require('./src/QRCodeDecode')
 
 /**
  * 通过Buffer识别二维码
  * @param {buufer} buffer 文件的Buffer
  */
-function decodeByBuffer(buffer,debug) {
+function decodeByBuffer(buffer, options) {
+	options || (options = {});
+	var debug = options.debug;
 	var type;
 	return new Promise(function (res, rej) {
 		type = (imgType(buffer) || {}).ext;
@@ -34,6 +35,7 @@ function decodeByBuffer(buffer,debug) {
 				throw 'not image!'
 		}
 	}).then(function (imageData) {
+		//可能有多帧图片处理
 		if (type == 'gif' || type == 'png') {
 			return new Promise(function (res, rej) {
 				var errList = [];
@@ -41,26 +43,21 @@ function decodeByBuffer(buffer,debug) {
 				var onerr = function (e) {
 					errList.push(e);
 					if (errList.length < images.length) return;
-					rej('解码失败!')
+					rej(errList);
 				}
-				debug && console.log('length',imageData.length)
+				debug && console.log('gif_length: ', imageData.length)
 				if (imageData.length <= 0) {
 					rej('解码失败!')
-				} else if (imageData.length > 3) {
+				} else if (imageData.length > 5 && !options.allFrames) {
+					var l = 1, i = 0, sp;
 					images = [];
-					var l = 1;
-					var i = 0;
-					while ( Math.pow(2,++l) < imageData.length){
-					}
-					// console.log('l:',l)
-					var sp = (imageData.length-1)/l;
-					// console.log('sp:',sp)
-					do{
-						// console.log(Math.floor(i*sp));
-						images.push(imageData[Math.floor(i*sp)])
-					}while(i++<l)
+					while (Math.pow(2, ++l) < imageData.length) {s}
+					sp = (imageData.length - 1) / l;
+					do {
+						images.push(imageData[Math.floor(i * sp)])
+					} while (i++ < l)
 				}
-				debug && console.log(images.length)
+				debug && console.log('gif_decode_length: ',images.length)
 				images.forEach(function (v) {
 					setTimeout(function () {
 						try {
@@ -81,14 +78,17 @@ function decodeByBuffer(buffer,debug) {
  * 识别二维码图片文件
  * @param {String} path 文件路径
  */
-exports.decodeByPath = function (path) {
+function decodeByPath(path,options) {
 	return new Promise(function (res, rej) {
 		fs.readFile(path, function (err, buffer) {
 			if (err) { return rej(err) }
-			res(decodeByBuffer(buffer));
+			res(decodeByBuffer(buffer,options));
 		})
 	})
 }
 
-exports.decodeByBuffer = decodeByBuffer;
-exports.decodeByImageData = qrDecode;
+module.exports = {
+	decodeByBuffer: decodeByBuffer,
+	decodeByPath: decodeByPath,
+	decodeByImageData: qrDecode
+}

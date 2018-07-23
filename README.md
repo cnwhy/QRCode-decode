@@ -1,44 +1,50 @@
-识别 QR码 图片  
-> 整理自 [jsqrcode](https://github.com/LazarSoft/jsqrcode)
+# qrcode-decode
+时要的二维码识别代码整理自 [jsqrcode](https://github.com/LazarSoft/jsqrcode);
 
 **修改点:**  
 1. 模块化
-2. 剥离识别函数,改成适合服务端使用 
-3. 需要用其它方法把图片转为 `ImageData` 提供给解码函数
+2. 剥离识别函数,改成适合服务端使用,但入参数还是保留为实现[ImageData](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageData)接口的对像
 
-**demo web**
-```html
-<input id="file" type="file">
+**关于 `ImageData`** 
+> `Canvas` 中可以用 `ctx.getImageData` 方法得到;  
+
+如果你不想亲自把图片转为 `ImageData`, 根据你你的项目, 请使用这两个JS:
+- `browser.js` 浏览器项目 有两个API `decodeByUrl`, `decodeByDom`
+- `server.js` 服务端项目 提供两个API `decodeByPath`, `decodeByBuffer` 
+> 服务端当前支持 `bmp` , `jpg` , `png` , `gif` 格式;
+
+## demo
+### web
+> web端最终是利用`Canvas`获取`ImageData`, 注意兼容及跨域问题 
+```js
+var qrcodeDecode = require('qrcode-decode/browser');
+// 传入二维码图片URL/dataURL
+qrcodeDecode.decodeByUrl(src, function (err, txt) {
+	if (err) { return console.log(err);}	
+	alert(txt);
+})
+
+// 传入DOM可以画到canvas的dom都可以 `img` `canvas` 'video' 等
+var img = document.getElementById('img1');
+qrcodeDecode.decodeByDom(img, function (err, txt) {
+	if (err) { return console.log(err);}	
+	alert(txt);
+})
 ```
 
-js: 
+### nodejs
+> 注意: 服务器端API是以 `promise` 返回结果,你注意你的`node`版本;
 ```js
-var qrcodeDecode = require('qrcode-decode');
+//解析文件
+var qrcodeDecode = require('qrcode-decode/server');
+qrcodeDecode.decodeByPath('xx/code.jpg').then(function(val){
+	console.log(val);
+},console.error.bind(console))
 
-document.getElementById('file').onchange = function (event) {
-	var file = event.target.files[0];
-	new Promise(function (ok, no) {
-		var reader = new FileReader();
-		reader.onload = evt => {
-			ok(evt.target.result);
-		};
-		reader.readAsDataURL(file);
-	}).then((src)=>{
-		return new Promise(function(ok){
-			var img = new Image();
-			img.src = src;
-			img.onload = function(){
-				var canvas = document.createElement("canvas");
-				var ctx = canvas.getContext('2d');
-				canvas.width = img.width;
-				canvas.height = img.height;
-				ctx.drawImage(img,0,0,canvas.width,canvas.height)
-				var imageData = ctx.getImageData(0,0,canvas.width,canvas.height)
-				ok(imageData);
-			}
-		})
-	}).then(data => {
-		return qrcodeDecode(data);
-	}).then(alert);
-}
+//解析Buffer
+fs.readFile(path, function (err, buffer) {
+	if (err) { return rej(err) }
+	resqrcodeDecode.decodeByBuffer(buffer);
+})
+
 ```

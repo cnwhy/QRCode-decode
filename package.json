@@ -1,11 +1,12 @@
 {
   "name": "qrcode-decode",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
+  "description": "QRCode parser/decode",
+  "main": "src/QRCodeDecode.js",
   "scripts": {
-    "test": "npm run demo",
-    "demo": "parcel ./demo/index.html"
+    "test": "node test/node.js",
+    "demo": "parcel ./demo/index.html",
+    "build": "bili browser.js --format umd,umd-min --banner --exports named"
   },
   "repository": {
     "type": "git",
@@ -13,15 +14,20 @@
   },
   "keywords": [
     "qrcode",
-    "decode"
+    "decode",
+    "parser"
   ],
-  "author": "cnwhy",
+  "author": {
+    "name": "cnwhy",
+    "email": "w.why@163.com"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/cnwhy/QRCode-decode/issues"
   },
   "homepage": "https://github.com/cnwhy/QRCode-decode#readme",
   "devDependencies": {
+    "bili": "^3.1.2",
     "parcel": "^1.9.7"
   },
   "dependencies": {
