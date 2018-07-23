@@ -24,9 +24,7 @@ function decodeByBuffer(buffer, options) {
 				res(imgDecode.png(buffer));
 				break;
 			case 'gif':
-				// var t1 = Date.now();
-				res(imgDecode.gif1(buffer));
-				// console.log('gif: ',Date.now() - t1);
+				res(imgDecode.gif(buffer));
 				break;
 			default:
 				if (type) {
@@ -87,8 +85,7 @@ function decodeByPath(path,options) {
 	})
 }
 
-module.exports = {
-	decodeByBuffer: decodeByBuffer,
-	decodeByPath: decodeByPath,
-	decodeByImageData: qrDecode
-}
+qrDecode.decodeByBuffer = decodeByBuffer;
+qrDecode.decodeByPath = decodeByPath;
+
+module.exports = qrDecode;

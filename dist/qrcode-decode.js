@@ -3029,19 +3029,11 @@
 	  img.onerror = cb;
 	};
 
-	var browser = {
-	  decodeByImageDate: QRCodeDecode,
-	  decodeByDom: decodeByDom,
-	  decodeByUrl: decodeByUrl
-	};
-	var browser_1 = browser.decodeByImageDate;
-	var browser_2 = browser.decodeByDom;
-	var browser_3 = browser.decodeByUrl;
+	QRCodeDecode.decodeByDom = decodeByDom;
+	QRCodeDecode.decodeByUrl = decodeByUrl;
+	var browser = QRCodeDecode;
 
 	exports.default = browser;
-	exports.decodeByImageDate = browser_1;
-	exports.decodeByDom = browser_2;
-	exports.decodeByUrl = browser_3;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 

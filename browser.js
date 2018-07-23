@@ -1,5 +1,5 @@
 
-var decode = require('./src/QRCodeDecode');
+var qrDecode = require('./src/QRCodeDecode');
 var decodeByDom = function (dom) {
 	var canvas = document.createElement("canvas")
 	var ctx = canvas.getContext('2d')
@@ -7,7 +7,7 @@ var decodeByDom = function (dom) {
 	canvas.height = dom.height;
 	ctx.drawImage(dom, 0, 0, canvas.width, canvas.height);
 	var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-	return decode(data)
+	return qrDecode(data)
 }
 
 var decodeByUrl = (src, cb) => {
@@ -24,8 +24,6 @@ var decodeByUrl = (src, cb) => {
 	img.onerror = cb;
 }
 
-module.exports = {
-	decodeByImageDate: decode,
-	decodeByDom: decodeByDom,
-	decodeByUrl: decodeByUrl
-}
+qrDecode.decodeByDom = decodeByDom;
+qrDecode.decodeByUrl = decodeByUrl;
+module.exports = qrDecode;

@@ -3,6 +3,13 @@
   "version": "0.0.1",
   "description": "QRCode parser/decode",
   "main": "src/QRCodeDecode.js",
+  "files": [
+    "README.md",
+    "browser.js",
+    "server.js",
+    "src/*",
+    "dist/*"
+  ],
   "scripts": {
     "test": "node test/node.js",
     "demo": "parcel ./demo/index.html",
