@@ -1,14 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<title>qrcode-decode</title>
 </head>
+
 <body>
-	<input type="file" name="file" id="file"><br>
+	<input type="file" name="file" id="file">
+	<br>
+	<button id="videoBut" onclick="buttonClick()">启用摄像头</button><br>
+	<video id="video" width="300"></video>
 	<div></div>
+
 </body>
-<script type="text/javascript" src="test.js"></script>
+<script type="text/javascript" src="../dist/qr-decode.js"></script>
+<script>
+	document.getElementById('file').onchange = function (event) {
+		var el = event.target;
+		if (!el.files.length) return;
+		var file = el.files[0];
+		new Promise(function (ok, no) {
+			if (window.URL && window.URL.createObjectURL) {
+				ok(window.URL.createObjectURL(file));
+			} else if (typeof FileReader) {
+				var reader = new FileReader();
+				reader.onload = evt => {
+					ok(evt.target.result);
+				};
+				reader.readAsDataURL(file);
+			} else {
+				no('浏览器不支持');
+			}
+		}).then((src) => {
+			qrDecode.decodeByUrl(src, function (err, txt) {
+				var msg = document.createElement("div")
+				if (err) {
+					console.log(err);
+					msg.innerHTML = "err: <br>" + err;
+				} else {
+					msg.innerHTML = txt;
+				}
+				document.body.appendChild(msg);
+			})
+
+		});
+	}
+	
+	var video =document.getElementById('video');
+	var videoBut =document.getElementById('videoBut');
+	var xc;
+	videoBut.onclick = videoEnable;
+
+	function videoEnable() {
+		var URL = window.URL || window.webkitURL;
+		navigator.getUserMedia({
+			video: true
+		}, function (stream) {
+			video.src = URL.createObjectURL(stream);// 将获取到的视频流对象转换为地址  
+			video.oncanplay = function(){
+				videoPlay();
+				video.width = video.videoWidth;
+				video.height = video.videoHeight;
+			}
+		}, function (error) {
+			alert(error.name || error);
+		});
+	}
+
+	function videoStop(){
+		clearInterval(xc);
+		video.pause();
+		videoBut.innerText = '启动';
+		videoBut.onclick = videoPlay;
+	}
+	function videoPlay(){
+		video.play();
+		videoBut.innerText = '停止';
+		xc = setInterval(function(){
+			try{
+				var txt = qrDecode.decodeByDom(video);
+				var msg = document.createElement("div")
+				msg.innerHTML = "识别到二维码: " + txt;
+				document.body.appendChild(msg);
+				videoStop();
+			}catch(err){
+				console.log(err);
+			}
+		},300)
+		videoBut.onclick = videoStop;
+	}
+</script>
+
 </html>

@@ -4,10 +4,10 @@
  * Released under the ISC License.
  */
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.qrDecode = {})));
-}(this, (function (exports) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.qrDecode = factory());
+}(this, (function () { 'use strict';
 
 	function AlignmentPattern(posX, posY, estimatedModuleSize) {
 	  this.x = posX;
@@ -3007,8 +3007,9 @@
 	var decodeByDom = function decodeByDom(dom) {
 	  var canvas = document.createElement("canvas");
 	  var ctx = canvas.getContext('2d');
-	  canvas.width = dom.width;
-	  canvas.height = dom.height;
+	  var isVideo = dom.tagName == 'VIDEO';
+	  canvas.width = isVideo ? dom.videoWidth : dom.width;
+	  canvas.height = isVideo ? dom.videoHeight : dom.height;
 	  ctx.drawImage(dom, 0, 0, canvas.width, canvas.height);
 	  var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	  return QRDecode(data);
@@ -3034,8 +3035,6 @@
 	QRDecode.decodeByUrl = decodeByUrl;
 	var browser = QRDecode;
 
-	exports.default = browser;
-
-	Object.defineProperty(exports, '__esModule', { value: true });
+	return browser;
 
 })));

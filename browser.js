@@ -3,8 +3,9 @@ var qrDecode = require('./src/QRDecode');
 var decodeByDom = function (dom) {
 	var canvas = document.createElement("canvas")
 	var ctx = canvas.getContext('2d')
-	canvas.width = dom.width;
-	canvas.height = dom.height;
+	var isVideo = dom.tagName == 'VIDEO'
+	canvas.width = isVideo ? dom.videoWidth : dom.width;
+	canvas.height = isVideo ? dom.videoHeight : dom.height;
 	ctx.drawImage(dom, 0, 0, canvas.width, canvas.height);
 	var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	return qrDecode(data)
