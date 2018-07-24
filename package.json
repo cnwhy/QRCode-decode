@@ -1,6 +1,6 @@
 {
   "name": "qr-decode",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "QRCode parser/decode",
   "main": "src/QRCodeDecode.js",
   "files": [

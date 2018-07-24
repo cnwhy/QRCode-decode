@@ -1,5 +1,5 @@
 /*!
- * qr-decode v0.0.1
+ * qr-decode v0.0.2
  * (c) 2018-present cnwhy <w.why@163.com>
  * Released under the ISC License.
  */
