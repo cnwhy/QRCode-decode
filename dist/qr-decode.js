@@ -1,5 +1,5 @@
 /*!
- * qr-decode v0.0.2
+ * qr-decode v0.0.3
  * (c) 2018-present cnwhy <w.why@163.com>
  * Released under the ISC License.
  */
@@ -847,8 +847,87 @@
 	  if (number >= 0) return number >> bits;else return (number >> bits) + (2 << ~bits);
 	};
 
+	var ObjDP = Object.defineProperty;
+
+	function addAttr(obj, prop, value) {
+	  ObjDP(obj, prop, {
+	    configurable: true,
+	    value: value
+	  });
+	}
+
+	var Matrix = {
+	  getPoint: function getPoint(x, y) {
+	    return this[this.width * y + x];
+	  },
+	  setPoint: function setPoint(x, y, v) {
+	    return this[this.width * y + x] = v;
+	  },
+	  getRow: function getRow(y) {
+	    var start = this.width * y;
+	    return this.slice(start, start + this.width);
+	  },
+	  getColumn: function getColumn(x) {
+	    var col = [];
+	    var y = 0;
+
+	    while (y + x < this.length) {
+	      col.push(this[y + x]);
+	      y += this.width;
+	    }
+
+	    return col;
+	  },
+	  getHeight: function getHeight() {
+	    return Math.ceil(this.length / width);
+	  }
+	};
+
+	var extendArray2Matrix_1 = function (arr, width) {
+	  addAttr(arr, 'width', width);
+	  ObjDP(arr, 'height', {
+	    get: Matrix.getHeight
+	  });
+	  addAttr(arr, 'get', Matrix.getPoint);
+	  addAttr(arr, 'set', Matrix.setPoint);
+	  addAttr(arr, 'getRow', Matrix.getRow);
+	  addAttr(arr, 'getColumn', Matrix.getColumn);
+	  return arr;
+	};
+	/**
+	 * imageData对像转灰度矩阵
+	 * @param {object} imageData 
+	 */
+
+
+	var imageData2greyMatrix = function (imageData) {
+	  var data = imageData.data,
+	      width = imageData.width,
+	      height = imageData.height;
+	  var greyscalePixels = [];
+
+	  for (var x = 0; x < width; x++) {
+	    for (var y = 0; y < height; y++) {
+	      var p = (y * width + x) * 4;
+	      var r = data[p + 0];
+	      var g = data[p + 1];
+	      var b = data[p + 2];
+	      var a = data[p + 3];
+	      greyscalePixels.push((r * 0.2126 + g * 0.7152 + b * 0.0722) * a / 255);
+	    }
+
+	    extendArray2Matrix(greyscalePixels);
+	    return greyscalePixels;
+	  }
+	};
+
+	var Matrix2bitMatrix = function (Matrix) {}; //exports.getPointAtMatrix
+
 	var utils = {
-		URShift: URShift
+		URShift: URShift,
+		extendArray2Matrix: extendArray2Matrix_1,
+		imageData2greyMatrix: imageData2greyMatrix,
+		Matrix2bitMatrix: Matrix2bitMatrix
 	};
 
 	function ErrorCorrectionLevel(ordinal, bits, name) {
@@ -965,7 +1044,7 @@
 
 	var URShift$2 = utils.URShift;
 
-	function BitMatrix(width, height) {
+	function BitMatrix$1(width, height) {
 	  if (!height) height = width;
 
 	  if (width < 1 || height < 1) {
@@ -1052,7 +1131,7 @@
 	  };
 	}
 
-	var BitMatix = BitMatrix;
+	var BitMatix = BitMatrix$1;
 
 	function ECB(count, dataCodewords) {
 	  this.count = count;
@@ -2891,8 +2970,10 @@
 
 	Decoder.decode = function (bits) {
 	  var parser = new BitMatrixParser(bits);
-	  var version = parser.readVersion();
-	  var ecLevel = parser.readFormatInformation().ErrorCorrectionLevel; // Read codewords
+	  var version = parser.readVersion(); //版本信息
+
+	  var ecLevel = parser.readFormatInformation().ErrorCorrectionLevel; //格式信息
+	  // Read codewords
 
 	  var codewords = parser.readCodewords(); // Separate into data blocks
 
@@ -2925,7 +3006,12 @@
 
 	var Decoder_1 = Decoder;
 
-	var debug = false; // 获取指定位置的灰度
+	var debug = false;
+	/**
+	 * 返回获取指定位置的灰度的函数
+	 * @param {ImageData} data 
+	 * @param {Object} base 一个有width,height信息
+	 */
 
 	var Pixel = function Pixel(data, base) {
 	  return function (x, y) {
@@ -2940,7 +3026,7 @@
 
 	var binarize = function binarize(data, base, th) {
 	  var ret = new Array(base.width * base.height);
-	  var getPixel = Pixel(data, base);
+	  var getPixel = Pixel(data, base); //
 
 	  for (var y = 0; y < base.height; y++) {
 	    for (var x = 0; x < base.width; x++) {

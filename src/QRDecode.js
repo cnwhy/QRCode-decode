@@ -3,7 +3,11 @@ var Decoder = require('./lib/Decoder');
 var debug = false;
 
 
-// 获取指定位置的灰度
+/**
+ * 返回获取指定位置的灰度的函数
+ * @param {ImageData} data 
+ * @param {Object} base 一个有width,height信息
+ */
 var Pixel = function (data,base) {
 	return function(x,y){
 		if (base.width < x || base.height < y) {
@@ -16,7 +20,7 @@ var Pixel = function (data,base) {
 
 var binarize = function(data,base,th){
 	var ret = new Array(base.width * base.height);
-	var getPixel = Pixel(data,base);
+	var getPixel = Pixel(data,base); //
     for (var y = 0; y < base.height; y++) {
         for (var x = 0; x < base.width; x++) {
             var gray = getPixel(x, y);

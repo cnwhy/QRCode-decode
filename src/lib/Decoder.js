@@ -32,8 +32,8 @@ Decoder.correctErrors = function (codewordBytes, numDataCodewords) {
 
 Decoder.decode = function (bits) {
 	var parser = new BitMatrixParser(bits);
-	var version = parser.readVersion();
-	var ecLevel = parser.readFormatInformation().ErrorCorrectionLevel;
+	var version = parser.readVersion(); //版本信息
+	var ecLevel = parser.readFormatInformation().ErrorCorrectionLevel; //格式信息
 
 	// Read codewords
 	var codewords = parser.readCodewords();

@@ -1,7 +1,7 @@
 var fs = require('fs')
 var imgType = require('image-type')
 var imgDecode = require('./src/imageDecode')
-var qrDecode = require('./src/QRDecode')
+var qrDecode = require('./src/')
 
 /**
  * 通过Buffer识别二维码
